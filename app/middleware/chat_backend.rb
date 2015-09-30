@@ -1,39 +1,29 @@
 class ChatBackend
   KEEPALIVE_TIME = 15 # in seconds
-  CHANNEL        = "chat-demo"
 
   def initialize(app)
     @app     = app
-    @clients = []
-    uri = URI.parse('redis://localhost:6379')
-    @redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
-    Thread.new do
-      redis_sub = Redis.new(host: uri.host, port: uri.port, password: uri.password)
-      redis_sub.subscribe(CHANNEL) do |on|
-        on.message do |channel, msg|
-          @clients.each {|ws| ws.send(msg) }
-        end
-      end
-    end
   end
 
   def call(env)
     puts 'call'
     if Faye::WebSocket.websocket?(env)
       ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
+
+
       ws.on :open do |event|
         p [:open, ws.object_id]
-        @clients << ws
+        ClientManager.add(ws)
       end
 
       ws.on :message do |event|
         p [:message, event.data]
-        @redis.publish(CHANNEL, sanitize(event.data))
+        ClientManager.send_message(event.data)
       end
 
       ws.on :close do |event|
         p [:close, ws.object_id, event.code, event.reason]
-        @clients.delete(ws)
+        ClientManager.remove(ws)
         ws = nil
       end
 
@@ -43,12 +33,5 @@ class ChatBackend
     else
       @app.call(env)
     end
-  end
-
-  private
-  def sanitize(message)
-    json = JSON.parse(message)
-    json.each {|key, value| json[key] = ERB::Util.html_escape(value) }
-    JSON.generate(json)
   end
 end
