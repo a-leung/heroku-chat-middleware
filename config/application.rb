@@ -2,9 +2,6 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 
-# TODO - find better way to load this
-require File.expand_path('../../app/middleware/chat_backend', __FILE__)
-
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -24,6 +21,6 @@ module HerokuChatMiddleware
     # config.i18n.default_locale = :de
 
 
-    config.middleware.use ChatDemo::ChatBackend
+    config.middleware.use 'ChatBackend'
   end
 end
