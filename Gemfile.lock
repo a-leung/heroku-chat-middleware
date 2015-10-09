@@ -30,7 +30,6 @@ GEM
     addressable (2.3.8)
     arel (5.0.1.20140414130214)
     builder (3.2.2)
-    byebug (6.0.2)
     coffee-rails (4.0.1)
       coffee-script (>= 2.2.0)
       railties (>= 4.0.0, < 5.0)
@@ -137,7 +136,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  byebug
   coffee-rails (~> 4.0.0)
   faye
   jbuilder (~> 2.0)
